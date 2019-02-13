@@ -25,6 +25,6 @@ If I can display an attractive graph of both the first set of values calculated 
 ride and the values in the log file, then that would be pretty sweet too.
 
 __Code to-do list__:
--  [ ] c0ontingency for large number overflow.
+-  [ ] contingency for large number overflow.
 -  [ ] rewrite that EOF check loop.
 -  [ ] refactor all the things.
