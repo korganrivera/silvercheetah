@@ -136,7 +136,7 @@ int main(int argc, char** argv){
         if(np_ra[i] > FTP)
             FTP = np_ra[i];
     }
-    FTP *= 0.95;   // This number is actually bullshit if the workout is less than 20 minutes. Fix later.
+    FTP *= 0.95;
 
     // Calc IF.
     IF = NP / FTP;
