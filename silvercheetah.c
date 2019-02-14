@@ -70,6 +70,7 @@ int main(int argc, char** argv){
 
         // skip to the next line.
         while((c = fgetc(csv)) != '\n' && c != EOF);
+
         comma = 0;
     }
 
@@ -121,20 +122,25 @@ int main(int argc, char** argv){
     printf("%u sec workout (%u mins).\n", n, n / 60);
     printf("AP = %lf\nNP = %lf\nFTP = %lf\nIF = %lf\nTSS = %lf\n", AP, NP, FTP, IF, TSS);
 
-    // write timestamp, ftp and tss to log.
-    if((log = fopen("tss.log","a")) != NULL)
-        fprintf(log, "%lld,%lf,%lf\n", (long long)timestamp, FTP, TSS);
-    else{
-        puts("can't open tss.log\n");
-        exit(1);
+    // Open tss.log. if it doesn't exist, create it and add a header comment to it.
+    if((log = fopen("tss.log","r")) == NULL){
+        if((log = fopen("tss.log","a")) == NULL){
+            puts("can't create logfile.");
+            exit(1);
+        }
+        fprintf(log, "# timestamp,FTP,TSS,CTL(fitness),ATL(fatigue),TSB(freshness)\n");
     }
-    fclose(log);
+    else{
+        fclose(log);
+        if((log = fopen("tss.log","a")) == NULL){
+            puts("can't open logfile.");
+            exit(1);
+        }
+    }
+    // write timestamp, ftp and tss to log.
+    fprintf(log, "%lld,%lf,%lf,,,\n", (long long)timestamp, FTP, TSS);
 
-    /*
-     * Next task: reopen the log file, read it, sort it, delete duplicates,
-     * calculate ctl, atl, tsb, and write back to log file.
-     * Also need to interpolate days without a workout: put 0 TSS in the missing dates.
-     */
+    fclose(log);
 }
 
 
