@@ -1,0 +1,14 @@
+To pipe a bunch of csv files to silvercheetah one at a time, you can do this:
+    ls csv/* | xargs -n1 silvercheetah
+
+This will create tss.log with empty elements.
+
+Next, prep tss.log to be processed by freshcheetah.
+
+    sort -nu tss.log > tss.temp
+    cat tss.temp > tss.log
+    rm tss.temp"
+
+And then
+
+    freshcheetah tss.log

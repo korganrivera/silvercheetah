@@ -10,11 +10,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <time.h>
 
-int rolling_average(double* array, double* target, unsigned n, unsigned interval);
+int rolling_average(double *array, double *target, unsigned n, unsigned interval);
 
-int main(int argc, char** argv){
+int main(int argc, char **argv){
     double *mps;                // dynamic array to hold mps values from csv file.
     double *np_ra;              // dynamic array to calculate rolling averages.
     double AP;                  // average power.
@@ -22,11 +21,10 @@ int main(int argc, char** argv){
     double FTP;                 // functional threshold power.
     double IF;                  // intensity factor.
     double TSS;                 // training stress score.
-    char c;
     FILE *csv, *log;            // wahoo csv file for input, log for output.
+    long long timestamp;        // unix timestamp from wahoo file.
     unsigned i, j, n = 0;
-    time_t timestamp;           // unix timestamp from wahoo file.
-    long long llv;              // Need to read timestamp.
+    char c;
 
     if(argc != 2){
         printf("USAGE: %s <wahoo fitness .csv file>\n", argv[0]);
@@ -34,7 +32,7 @@ int main(int argc, char** argv){
     }
 
     // Open the Wahoo Fitness csv file.
-    if((csv = fopen(argv[1],"r")) == NULL){ printf("\ncan't open \'%s\'.", argv[1]); exit(1); }
+    if((csv = fopen(argv[1],"r")) == NULL){ fprintf(stderr, "\ncan't open \'%s\'.", argv[1]); exit(1); }
 
     // If you're going to check that this file is actually in the correct format, do that here.
 
@@ -52,8 +50,7 @@ int main(int argc, char** argv){
     while((c = fgetc(csv)) != '\n' && c != EOF);
 
     // Grab the first timestamp while I'm here.
-    fscanf(csv,"%lld", &llv);
-    timestamp = llv;
+    fscanf(csv,"%lld", &timestamp);
 
     // Read just the mps values into the array.
     unsigned comma = i = 0;
@@ -125,20 +122,20 @@ int main(int argc, char** argv){
     // Open tss.log. if it doesn't exist, create it and add a header comment to it.
     if((log = fopen("tss.log","r")) == NULL){
         if((log = fopen("tss.log","a")) == NULL){
-            puts("can't create logfile.");
+            fprintf(stderr, "can't create logfile.");
             exit(1);
         }
-        fprintf(log, "# timestamp,FTP,TSS,CTL(fitness),ATL(fatigue),TSB(freshness)\n");
+        fprintf(log, "# timestamp,FTP,TSS,CTL(fitness),ATL(fatigue),TSB(freshness)");
     }
     else{
         fclose(log);
         if((log = fopen("tss.log","a")) == NULL){
-            puts("can't open logfile.");
+            fprintf(stderr, "can't open logfile.");
             exit(1);
         }
     }
     // write timestamp, ftp and tss to log.
-    fprintf(log, "%lld,%lf,%lf,,,\n", (long long)timestamp, FTP, TSS);
+    fprintf(log, "\n%lld,%lf,%lf,,,", timestamp, FTP, TSS);
 
     fclose(log);
 }
