@@ -11,9 +11,9 @@ __To-do list__:
 -  [x] log the timestamped tss and ftp values in a log file.
 
  __For those values in the log file, it will__:
--  [ ] calculate CTL (fitness)
--  [ ] calculate ATL (fatigue)
--  [ ] calculate TSB (freshness)
+-  [x] calculate CTL (fitness)
+-  [x] calculate ATL (fatigue)
+-  [x] calculate TSB (freshness)
 
 Wahoo shares .csv files to a folder in Dropbox. I want to set silvercheetah as a cron job to scan that folder for new files.
 
