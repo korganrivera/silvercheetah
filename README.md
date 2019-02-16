@@ -37,20 +37,20 @@ tss.log can be displayed using gnuplot if you want.
 * Files found in there will be processed and a new tss.log will be created.
 * If you change the default folder, you can delete the wahoo_csv_files folder if you want.
 
-## What can I do with tss.log?
+### What can I do with tss.log?
 tss.log contains virtual power calculations using speed data taken from your wahoo csv files. It contains values for FTP, TSS, CTL, ATL, TSB. This file can be plotted using gnuplot or whatever so you can view your training progress in a graph. You'll then be able to use this data to decide what your fitness level is, how much fatigue you can handle before burnout, and your daily TSS goals to improve your fitness as efficiently as possible.
 
-## Can I use this code for training done with a different bike trainer?
+### Can I use this code for training done with a different bike trainer?
 Nope. The calculations are specifically tailored to the Kinetic Road Machine.
 
-## Can I use this code for rides done outdoors?
+### Can I use this code for rides done outdoors?
 Nope. Same as the above answer.
 
-## Will this work with files other than the Wahoo Fitness .csv files?
+### Will this work with files other than the Wahoo Fitness .csv files?
 Nope. The code expects the files to be of that specific format.
 
-## How do I get csv files from the Wahoo Fitness app?
+### How do I get csv files from the Wahoo Fitness app?
 Once you've completed your workout, scroll to the bottom of your workout summary and click the 'share' icon. Choose 'csv'. You'll then be asked where to save it. I choose a folder in my Dropbox. Put the path of your files in the `config` file: see "What if I want to use a different folder?" above.
 
-## This code sucks.
+### This code sucks.
 ikr. But if you have the same equipment that I do, it beats paying a subscription just to get the same data. :)
