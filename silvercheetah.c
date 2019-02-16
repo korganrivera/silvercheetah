@@ -31,6 +31,7 @@ int main(int argc, char **argv){
     double AP, NP, FTP, IF, TSS;
     double *ftp, *tss, *ctl, *atl, *tsb;
     long long timestamp, *ts;
+
     // Get target folder.
     if((fp = fopen("config","r")) == NULL){
         printf("can't find config file. creating...");
@@ -39,6 +40,7 @@ int main(int argc, char **argv){
             exit(1);
         }
         printf("done.\n");
+
         // set ./wahoo_csv_files as default location of your csv files.
         fprintf(fp, "./wahoo_csv_files");
         fclose(fp);
@@ -47,17 +49,22 @@ int main(int argc, char **argv){
             exit(1);
         }
     }
+
     // get folder location from config file.
     fgets(folder_location, 4098, fp);
     fclose(fp);
+
     // remove fget's newline if there is one.
     folder_location[strcspn(folder_location, "\n")] = 0;
+
     // build the find command.
     strcat(find_command, folder_location);
     strcat(find_command, " -maxdepth 1 -type f > filelist");
+
     // Make list of current files in the target folder.
     system(find_command);
     rebuild:
+
     // If old list doesn't exist, create it.
     if((fp = fopen(".files_old","r")) == NULL){
         if((fp = fopen(".files_old","w")) == NULL){
@@ -66,10 +73,13 @@ int main(int argc, char **argv){
         }
     }
     fclose(fp);
+
     // Make a list of the new files.
     system("sort .files_old filelist | uniq -u > newfiles");
+
     // open newfiles.
     if((fp = fopen("newfiles","r")) == NULL){ fprintf(stderr, "\ncan't open newfiles"); exit(1); }
+
 
     //count filenames.
     filecount = 0;
@@ -81,14 +91,18 @@ int main(int argc, char **argv){
         system("notify-send \"silvercheetah: updating\"");
     else
         puts("tss.log is up to date");
+
     // process each file.
     for(i = 0; i < filecount; i++){
         char filename[4098];
         fgets(filename, 4098, fp);
+
         // remove fget's newline if there is one.
         filename[strcspn(filename, "\n")] = 0;
+
         // Open the Wahoo Fitness csv file.
         if((wahoo_file = fopen(filename,"r")) == NULL){
+
             // If files were removed, rebuild newfiles and tss.log from scratch.
             puts("Files were removed. Rebuilding tss.log");
             system("rm .files_old");
@@ -97,55 +111,79 @@ int main(int argc, char **argv){
             goto rebuild;
         }
         printf("adding file \"%s\"...", filename);
+
         // Count lines in the file.
         linecount = 0;
         while((c = fgetc(wahoo_file)) != EOF) if(c == '\n') linecount++;
+        linecount--;
         rewind(wahoo_file);
+        printf("\nfile has %u lines.\n", linecount);
         // malloc space for mps values.
         if((mps = malloc(linecount * sizeof(double))) == NULL){ fprintf(stderr, "malloc failed.\n"); exit(1); }
+
+        // initialise mps[].
+        for(j = 0; j < linecount; j++)
+            mps[j] = 0.0;
         // malloc space for NP values.
         if((ra = malloc(linecount * sizeof(double))) == NULL){ fprintf(stderr, "malloc failed.\n"); exit(1); }
+
         // Skip header line.
         while((c = fgetc(wahoo_file)) != '\n' && c != EOF);
+
         // Grab the first timestamp while I'm here.
         fscanf(wahoo_file,"%lld", &timestamp);
+
         // Read just the mps values into the array.
-        unsigned comma = j = 0;
-        while((c = fgetc(wahoo_file)) != EOF){
-            // Skip first 6 fields.
+        j = 0;
+        for(j = 0; j < linecount; j++){
+            // skip the first 6 commas.
+            unsigned comma = 0;
             while(comma < 6){
                 c = fgetc(wahoo_file);
                 if(c == ',')
                     comma++;
             }
-            // Read the float in the 7th field.
-            fscanf(wahoo_file, "%lf", &mps[j++]);
+            fscanf(wahoo_file, "%lf", &mps[j]);
+
+            // check
+            printf("%lf\n", mps[j]);
             // skip to the next line.
             while((c = fgetc(wahoo_file)) != '\n' && c != EOF);
-            comma = 0;
+            if(feof(wahoo_file))
+                break;
         }
+
+
+
         fclose(wahoo_file);
 
         // calculate AP.
         AP = 0.0;
         for(j = 0; j < linecount; j++){
+
             // convert mps to mph.
             mps[j] *= 2.23694;
+
             // convert to watts using Kinetic's formula.
             mps[j] = mps[j] * (5.24482  + 0.01968 * mps[j] * mps[j]);
+
             // calculate average power.
             AP += mps[j] / (double)linecount;
         }
+
         // Calculate 30-sec rolling average for NP.
         rolling_average(mps, ra, linecount, 30);
+
         // Raise each value to 4th power and calc average.
         NP = 0.0;
         for(j = 0; j < linecount; j++){
             ra[j] = ra[j] * ra[j] * ra[j] * ra[j];
             NP += ra[j] / (double)linecount;
         }
+
         // Find 4th root of this number.
         NP = sqrt(sqrt(NP));
+
         // Calculate FTP: maximum value from 20-min rolling average.
         rolling_average(mps, ra, linecount, 1200);
         free(mps);
@@ -156,10 +194,13 @@ int main(int argc, char **argv){
         }
         free(ra);
         FTP *= 0.95;
+
         // Calc IF.
         IF = NP / FTP;
+
         // Calc TSS.
         TSS = IF * IF * 100.0 * ((double)linecount / 3600.0);
+
         // Open tss.log. if it doesn't exist, create it and add a header comment to it.
         if((log = fopen("tss.log","r")) == NULL){
             if((log = fopen("tss.log","a")) == NULL){
@@ -175,6 +216,7 @@ int main(int argc, char **argv){
                 exit(1);
             }
         }
+
         // write timestamp, ftp and tss to log.
         fprintf(log, "\n%lld,%lf,%lf,,,", timestamp, FTP, TSS);
         fclose(log);
@@ -182,21 +224,28 @@ int main(int argc, char **argv){
     }
     fclose(fp);
     system("rm newfiles");
+
     // make new .files_old file.
     system("mv filelist .files_old");
+
 
     // if no files were added to tss.log, then we're done.
     if(filecount == 0)
         exit(0);
+
     // otherwise, process tss.log freshcheetah-style.
+
     // open tss.log
     if((log = fopen("tss.log","r")) == NULL){ fprintf(stderr, "Can't open tss.log"); exit(1); }
+
     // count lines in file.
     linecount = 0;
     while((c = fgetc(log)) != EOF) if(c == '\n') linecount++;
     rewind(log);
+
     // skip over the header comment.
     while((c = fgetc(log)) != '\n' && c != EOF);
+
     // make storage for all the things.
     if((ts  = malloc(linecount * sizeof(long long))) == NULL){ fprintf(stderr, "malloc failed.\n"); exit(1); }
     if((ftp = malloc(linecount * sizeof(double))) == NULL){    fprintf(stderr, "malloc failed.\n"); exit(1); }
@@ -205,9 +254,11 @@ int main(int argc, char **argv){
     if((atl = malloc(linecount * sizeof(double))) == NULL){    fprintf(stderr, "malloc failed.\n"); exit(1); }
     if((tsb = malloc(linecount * sizeof(double))) == NULL){    fprintf(stderr, "malloc failed.\n"); exit(1); }
 
-    // read tss.log into arrays.
+
+        // read tss.log into arrays.
     for(i = 0; i < linecount; i++){
         fscanf(log, "%lld,%lf,%lf,", &ts[i], &ftp[i], &tss[i]);
+
         // check what the next character is.
         FILE *origin = log;
         c = fgetc(log);
@@ -221,21 +272,27 @@ int main(int argc, char **argv){
     }
     fclose(log);
 
+
     // calculate ctl and atl.
     rolling_average(tss, ctl, linecount, 42);
     rolling_average(tss, atl, linecount, 7);
+
 
     // calculate tsb.
     for(i = 0; i < linecount; i++)
         tsb[i] = ctl[i] - atl[i];
 
+
     // overwrite tss.log with new data.
     if((log = fopen("tss.log","w")) == NULL){ fprintf(stderr, "Can't open tss.log"); exit(1); }
+
     // write header comment.
     fprintf(log, "# timestamp,FTP,TSS,CTL(fitness),ATL(fatigue),TSB(freshness)");
+
     // write data.
     for(i = 0; i < linecount; i++)
         fprintf(log, "\n%lld,%lf,%lf,%lf,%lf,%lf", ts[i], ftp[i], tss[i], ctl[i], atl[i], tsb[i]);
+
     // close tss.log
     fclose(log);
 }

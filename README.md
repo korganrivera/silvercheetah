@@ -54,3 +54,13 @@ Once you've completed your workout, scroll to the bottom of your workout summary
 
 ### This code sucks.
 ikr. But if you have the same equipment that I do, it beats paying a subscription just to get the same data. :)
+
+### How can I plot tss.log with gnuplot?
+* install gnuplot
+* run `gnuplot`
+* enter `set datafile separator ","`
+* enter `plot 'tss.log' u 1:2 w l title 'FTP', 'tss.log' u 1:3 w l title 'TSS', 'tss.log' u 1:4 w l title 'CTL (fitness)', 'tss.log' u 1:5 w l title 'ATL (fatigue)', 'tss.log' u 1:6 w l title 'TSB (freshness)'`
+
+## to-do list
+I still need to interpolate the days where I don't work out. In fact, without that done, none of the math is legit: rolling averages don't make sense without this interpolation, and cycling math is pretty much a rolling-average-fest.
+
