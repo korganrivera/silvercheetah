@@ -17,3 +17,17 @@ I've set my Wahoo Fitness app to share csv files to a folder in Dropbox.
 Silvercheetah can be set to run with inotify or cron.
 
 tss.log can be displayed using gnuplot if you want.
+
+## HOW TO USE
+The default folder for your wahoo csv files is ./wahoo_csv_files
+If it doesn't exist, create it.
+put some wahoo csv files in there.
+run `./silvercheetah`
+Files found in there will be processed and tss.log will be created
+
+### What if I want to use a different folder?
+* Put the folder path on the first line of the config file, no trailing slash. For example, `~/Dropbox/wahoo_files`
+* If .files_old and tss.log exist, delete them.
+* Run `./silvercheetah`
+* Files found in there will be processed and a new tss.log will be created.
+* If you change the default folder, you can delete the wahoo_csv_files folder if you want.

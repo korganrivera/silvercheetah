@@ -23,14 +23,40 @@ int rolling_average(double *array, double *target, unsigned n, unsigned interval
 int main(int argc, char **argv){
     FILE *fp, *wahoo_file, *new_files, *log;
     char c;
+    char find_command[4134] = "find ";
+    char folder_location[4098];
     unsigned i, j, filecount, linecount;
     double *mps;
     double *ra;
     double AP, NP, FTP, IF, TSS;
     double *ftp, *tss, *ctl, *atl, *tsb;
     long long timestamp, *ts;
-    // Make list of current files in my dropbox folder.
-    system("find ~/Dropbox/cycling_files/csv_files -maxdepth 1 -type f > filelist");
+    // Get target folder.
+    if((fp = fopen("config","r")) == NULL){
+        printf("can't find config file. creating...");
+        if((fp = fopen("config","w")) == NULL){
+            printf("failed.\n");
+            exit(1);
+        }
+        printf("done.\n");
+        // set ./wahoo_csv_files as default location of your csv files.
+        fprintf(fp, "./wahoo_csv_files");
+        fclose(fp);
+        if((fp = fopen("config","r")) == NULL){
+            puts("can't open config");
+            exit(1);
+        }
+    }
+    // get folder location from config file.
+    fgets(folder_location, 4098, fp);
+    fclose(fp);
+    // remove fget's newline if there is one.
+    folder_location[strcspn(folder_location, "\n")] = 0;
+    // build the find command.
+    strcat(find_command, folder_location);
+    strcat(find_command, " -maxdepth 1 -type f > filelist");
+    // Make list of current files in the target folder.
+    system(find_command);
     rebuild:
     // If old list doesn't exist, create it.
     if((fp = fopen(".files_old","r")) == NULL){
