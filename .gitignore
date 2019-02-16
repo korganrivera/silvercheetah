@@ -3,3 +3,5 @@
 *.out
 silvercheetah
 freshcheetah
+.files_old
+tss.log

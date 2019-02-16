@@ -15,4 +15,5 @@ Silvercheetah then processes tss.log to do the following:
 I've set my Wahoo Fitness app to share csv files to a folder in Dropbox.
 
 Silvercheetah can be set to run with inotify or cron.
+
 tss.log can be displayed using gnuplot if you want.
