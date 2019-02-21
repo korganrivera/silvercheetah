@@ -10,12 +10,9 @@ Silvercheetah can do the following:
 * scan a folder for new Wahoo csv files
 * strip speed values from each file
 * calculate FTP and TSS from speed values
+* interpolates missing workouts
+* calculate ATL, CTL, TSB from TSS values
 * write these to tss.log
-
-Silvercheetah then processes tss.log to do the following:
-* calculate CTL (fitness)
-* calculate ATL (fatigue)
-* calculate TSB (freshness)
 
 I've set my Wahoo Fitness app to share csv files to a folder in Dropbox.
 
