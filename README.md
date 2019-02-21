@@ -31,11 +31,9 @@ tss.log can be displayed using gnuplot if you want.
 * Files found in there will be processed and tss.log will be created.
 
 ### What if I want to use a different folder?
-* Put the folder path on the first line of the config file, no trailing slash. For example, `~/Dropbox/wahoo_files`
-* If .files_old and tss.log exist, delete them.
+* Put the folder path that you want to use on the first line of the config file, no trailing slash. For example, `~/Dropbox/wahoo_files`
 * Run `./silvercheetah`
 * Files found in there will be processed and a new tss.log will be created.
-* If you change the default folder, you can delete the wahoo_csv_files folder if you want.
 
 ### What can I do with tss.log?
 tss.log contains virtual power calculations using speed data taken from your wahoo csv files. It contains values for FTP, TSS, CTL, ATL, TSB. This file can be plotted using gnuplot or whatever so you can view your training progress in a graph. You'll then be able to use this data to decide what your fitness level is, how much fatigue you can handle before burnout, and your daily TSS goals to improve your fitness as efficiently as possible.
@@ -50,7 +48,7 @@ Nope. Same as the above answer.
 Nope. The code expects the files to be of that specific format.
 
 ### How do I get csv files from the Wahoo Fitness app?
-Once you've completed your workout, scroll to the bottom of your workout summary and click the 'share' icon. Choose 'csv'. You'll then be asked where to save it. I choose a folder in my Dropbox. Put the path of your files in the `config` file: see "What if I want to use a different folder?" above.
+Once you've completed your workout with the Wahoo Fitness app, scroll to the bottom of your workout summary and click the 'share' icon. Choose 'csv'. You'll then be asked where to save it. I choose a folder in my Dropbox. Put the path of your files in the `config` file: see "What if I want to use a different folder?" above.
 
 ### This code sucks.
 ikr. But if you have the same equipment that I do, it beats paying a subscription just to get the same data. :)
@@ -60,7 +58,4 @@ ikr. But if you have the same equipment that I do, it beats paying a subscriptio
 * run `gnuplot`
 * enter `set datafile separator ","`
 * enter `plot 'tss.log' u 1:2 w l title 'FTP', 'tss.log' u 1:3 w l title 'TSS', 'tss.log' u 1:4 w l title 'CTL (fitness)', 'tss.log' u 1:5 w l title 'ATL (fatigue)', 'tss.log' u 1:6 w l title 'TSB (freshness)'`
-
-## to-do list
-I still need to interpolate the days where I don't work out. In fact, without that done, none of the math is legit: rolling averages don't make sense without this interpolation, and cycling math is pretty much a rolling-average-fest.
 
