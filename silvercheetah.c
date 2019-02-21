@@ -1,3 +1,9 @@
+/* Thu Feb 21 15:39:49 CST 2019
+ * Wahoo .csv file processing code.
+ * For more details, read README.md.
+ * compile with: gcc silvercheetah.c -o silvercheetah -lm
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,9 +44,10 @@ int main(int argc, char **argv){
         }
 
         // set ./wahoo_csv_files as default location of your csv files.
-        fprintf(fp, "./wahoo_csv_files");
-        rewind(fp);
-        puts("done. Default location for Wahoo files is ./wahoo_csv_files. If you don't like this, change the location in the config file.");
+        fprintf(fp, "./whatever_folder_path_goes_here_no_trailing_slash");
+        fclose(fp);
+        puts("done.\nPut your folder path in the config file and then run silvercheetah again.");
+        exit(0);
     }
 
     // get folder location from config file.
@@ -55,6 +62,7 @@ int main(int argc, char **argv){
     strcat(find_command, " -maxdepth 1 -type f > filelist");
 
     // Make list of current files in the target folder.
+    //printf("running this command: %s", find_command);
     system(find_command);
 
     // Count lines in filelist.
