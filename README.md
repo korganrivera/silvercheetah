@@ -84,9 +84,9 @@ and then in `~/.config/openbox/autostart`, I have this:
 /home/korgan/bin/dbus_silvercheetah.sh &
 ```
 lastly, install `incron`, run `incrontab -e` and put this in there:
-
+```
 /home/korgan/Dropbox/cycling_files/csv_files	IN_MODIFY,IN_CREATE,IN_DELETE,IN_MOVE	/home/korgan/code/silvercheetah/sc.sh
-
+```
 Obviously this is for my laptop, but basically you put this in there:
 ```
 <path of your csv files> IN_MODIFY,IN_CREATE,IN_DELETE,IN_MOVE <path of sc.sh>
