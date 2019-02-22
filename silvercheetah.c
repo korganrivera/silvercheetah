@@ -10,6 +10,9 @@
 #include <math.h>
 #include <time.h>
 
+#define TSS_LOG_PATH "/home/korgan/code/silvercheetah/tss.log"
+#define CONFIG_PATH "/home/korgan/code/silvercheetah/config"
+
 int rolling_average(double* array, double* target, unsigned n, unsigned interval){
     for(unsigned i = 0; i < n; i++){
         if(i < interval){
@@ -26,6 +29,7 @@ int rolling_average(double* array, double* target, unsigned n, unsigned interval
 int main(int argc, char **argv){
     FILE *fp;
     char c, folder_location[4098];
+    char rm_log_command[4134] = "rm ";
     char find_command[4134] = "find ";
     unsigned filecount;
     unsigned array_size, i, j, k;
@@ -36,9 +40,9 @@ int main(int argc, char **argv){
     double NP, FTP, IF, TSS;
 
     // open config file.
-    if((fp = fopen("config","r")) == NULL){
+    if((fp = fopen(CONFIG_PATH,"r")) == NULL){
         printf("can't find config file. creating...");
-        if((fp = fopen("config","w")) == NULL){
+        if((fp = fopen(CONFIG_PATH,"w")) == NULL){
             printf("failed.\n");
             exit(1);
         }
@@ -59,14 +63,14 @@ int main(int argc, char **argv){
 
     // build the find command.
     strcat(find_command, folder_location);
-    strcat(find_command, " -maxdepth 1 -type f > filelist");
+    strcat(find_command, " -maxdepth 1 -type f > /home/korgan/code/silvercheetah/filelist");
 
     // Make list of current files in the target folder.
     //printf("running this command: %s", find_command);
     system(find_command);
 
     // Count lines in filelist.
-    if((fp = fopen("filelist","r")) == NULL){
+    if((fp = fopen("/home/korgan/code/silvercheetah/filelist","r")) == NULL){
         printf("can't open filelist\n");
         exit(1);
     }
@@ -79,10 +83,11 @@ int main(int argc, char **argv){
     if(filecount == 0){
         fclose(fp);
         puts("no files, nothing to do. cleaning up.");
-        system("rm filelist");
-        if((fp = fopen("tss.log", "r")) != NULL){
+        system("rm /home/korgan/code/silvercheetah/filelist");
+        if((fp = fopen(TSS_LOG_PATH, "r")) != NULL){
             fclose(fp);
-            system("rm tss.log");
+            strcat(rm_log_command, TSS_LOG_PATH);
+            system(rm_log_command);
         }
         exit(0);
     }
@@ -192,7 +197,7 @@ int main(int argc, char **argv){
         tss[i] = TSS;
     }
     fclose(fp);
-    system("rm filelist");
+    system("rm /home/korgan/code/silvercheetah/filelist");
 
     // selection sort the list, by timestamp.
     if(array_size > 1){
@@ -368,7 +373,7 @@ int main(int argc, char **argv){
         tsb[i] = ctl[i] - atl[i];
 
     // write arrays to tss.log
-    if((fp = fopen("tss.log","w")) == NULL){ fprintf(stderr, "Can't open tss.log"); exit(1); }
+    if((fp = fopen(TSS_LOG_PATH,"w")) == NULL){ fprintf(stderr, "Can't open tss.log"); exit(1); }
     for(i = 0; i < array_size; i++){
         fprintf(fp, "%llu,%lf,%lf,%lf,%lf,%lf", ts[i], ftp[i], tss[i], ctl[i], atl[i], tsb[i]);
         if(i < array_size - 1)

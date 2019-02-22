@@ -56,3 +56,36 @@ ikr. But if you have the same equipment that I do, it beats paying a subscriptio
 * enter `set datafile separator ","`
 * enter `plot 'tss.log' u 1:2 w l title 'FTP', 'tss.log' u 1:3 w l title 'TSS', 'tss.log' u 1:4 w l title 'CTL (fitness)', 'tss.log' u 1:5 w l title 'ATL (fatigue)', 'tss.log' u 1:6 w l title 'TSB (freshness)'`
 
+## NOTES
+I personally run this code using a script that runs silvercheetah and notify-send to let me know something happened. The 4-hour problem was getting notify-send to run within a script. Turns out to be a solution involving d-bus. I've no idea what that is (yet) but here's the script I use:
+
+sc.sh:
+```
+#!/bin/sh
+if [ -r ~/.dbus/Xdbus ]; then
+  . ~/.dbus/Xdbus
+fi
+/home/korgan/code/silvercheetah/silvercheetah
+notify-send "I am the cheetah!"
+```
+
+Then I have a script which runs when I login that writes that Xdbus file, and that one looks like this:
+
+~/bin/dbus_silvercheetah.sh
+```
+#!/bin/sh
+touch $HOME/.dbus/Xdbus
+chmod 600 $HOME/.dbus/Xdbus
+env | grep DBUS_SESSION_BUS_ADDRESS > $HOME/.dbus/Xdbus
+echo 'export DBUS_SESSION_BUS_ADDRESS' >> $HOME/.dbus/Xdbus
+exit 0
+```
+and then in ~/.config/openbox/autostart, I have this:
+```
+# run this weird fucking d-bus command so notify-send will fucking work for silvercheetah
+/home/korgan/bin/dbus_silvercheetah.sh &
+```
+
+## TO-DO
+I've put my own specific paths in silvercheetah.c and I need to change that so that anyone can set them in config.
+
