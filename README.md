@@ -40,7 +40,7 @@ Nope. Same as the above answer.
 Nope. The code expects the files to be of that specific format.
 
 ### How do I get csv files from the Wahoo Fitness app?
-Once you've completed your workout with the Wahoo Fitness app, scroll to the bottom of your workout summary and click the 'share' icon. Choose 'csv'. You'll then be asked where to save it. I choose a folder in my Dropbox. Put the path of your files in the `config` file: see "What if I want to use a different folder?" above.
+Once you've completed your workout with the Wahoo Fitness app, scroll to the bottom of your workout summary and click the 'share' icon. Choose 'csv'. You'll then be asked where to save it. I choose a folder in my Dropbox. Put the path of your files in the `config` file.
 
 ### This code sucks.
 ikr. But if you have the same equipment that I do, it beats paying a subscription just to get the same data. :)
