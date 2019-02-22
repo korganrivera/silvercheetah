@@ -7,7 +7,7 @@ I specifically use this code with the following equipment:
 * Kinetic Road Machine
 
 Silvercheetah can do the following:
-* scan a folder for new Wahoo csv files
+* scan a folder for Wahoo csv files
 * strip speed values from each file
 * calculate FTP and TSS from speed values
 * interpolates missing workouts
@@ -21,16 +21,11 @@ Silvercheetah can be set to run with inotify or cron.
 tss.log can be displayed using gnuplot if you want.
 
 ## HOW TO USE
-* The default folder for your wahoo csv files is ./wahoo_csv_files.
-* If it doesn't exist, create it.
-* put some wahoo csv files in there.
 * run `./silvercheetah`
-* Files found in there will be processed and tss.log will be created.
-
-### What if I want to use a different folder?
-* Put the folder path that you want to use on the first line of the config file, no trailing slash. For example, `~/Dropbox/wahoo_files`
-* Run `./silvercheetah`
-* Files found in there will be processed and a new tss.log will be created.
+* silvercheetah will create a config file for you to edit.
+* put the path of your wahoo files in the config file.
+* run `./silvercheetah`
+* Files found will be processed and a tss.log will be created.
 
 ### What can I do with tss.log?
 tss.log contains virtual power calculations using speed data taken from your wahoo csv files. It contains values for FTP, TSS, CTL, ATL, TSB. This file can be plotted using gnuplot or whatever so you can view your training progress in a graph. You'll then be able to use this data to decide what your fitness level is, how much fatigue you can handle before burnout, and your daily TSS goals to improve your fitness as efficiently as possible.
@@ -54,12 +49,15 @@ ikr. But if you have the same equipment that I do, it beats paying a subscriptio
 * install gnuplot
 * run `gnuplot`
 * enter `set datafile separator ","`
-* enter `plot 'tss.log' u 1:2 w l title 'FTP', 'tss.log' u 1:3 w l title 'TSS', 'tss.log' u 1:4 w l title 'CTL (fitness)', 'tss.log' u 1:5 w l title 'ATL (fatigue)', 'tss.log' u 1:6 w l title 'TSB (freshness)'`
+* enter `plot 'tss.log' u 1:4 w l title 'CTL (fitness)', 'tss.log' u 1:5 w l title 'ATL (fatigue)', 'tss.log' u 1:6 w l title 'TSB (freshness)'`
 
-## NOTES
-I personally run this code using a script that runs silvercheetah and notify-send to let me know something happened. The 4-hour problem was getting notify-send to run within a script. Turns out to be a solution involving d-bus. I've no idea what that is (yet) but here's the script I use:
+## How I get everything to run correctly
+I personally run this code using a script that runs `silvercheetah`
+and `notify-send` to let me know something happened. The 4-hour problem was
+getting `notify-send` to run within a script. Turns out to be a solution
+involving d-bus. I've no idea what that is (yet) but here's the script I use:
 
-sc.sh:
+/home/korgan/code/silvercheetah/sc.sh:
 ```
 #!/bin/sh
 if [ -r ~/.dbus/Xdbus ]; then
@@ -68,8 +66,8 @@ fi
 /home/korgan/code/silvercheetah/silvercheetah
 notify-send "I am the cheetah!"
 ```
-
-Then I have a script which runs when I login that writes that Xdbus file, and that one looks like this:
+Remember to create the `~/.dbus` folder before running that.
+Then I have a script which runs when I login and writes to that Xdbus file, and that one looks like this:
 
 ~/bin/dbus_silvercheetah.sh
 ```
@@ -80,12 +78,27 @@ env | grep DBUS_SESSION_BUS_ADDRESS > $HOME/.dbus/Xdbus
 echo 'export DBUS_SESSION_BUS_ADDRESS' >> $HOME/.dbus/Xdbus
 exit 0
 ```
-and then in ~/.config/openbox/autostart, I have this:
+and then in `~/.config/openbox/autostart`, I have this:
 ```
-# run this weird fucking d-bus command so notify-send will fucking work for silvercheetah
+# run this weird fucking dbus command so notify-send will fucking work with silvercheetah
 /home/korgan/bin/dbus_silvercheetah.sh &
 ```
+lastly, install `incron`, run `incrontab -e` and put this in there:
+/home/korgan/Dropbox/cycling_files/csv_files	IN_MODIFY,IN_CREATE,IN_DELETE,IN_MOVE	/home/korgan/code/silvercheetah/sc.sh
+
+Obviously this is for my laptop, but basically you put this in there:
+```
+<path of your csv files> IN_MODIFY,IN_CREATE,IN_DELETE,IN_MOVE <path of sc.sh>
+```
+To get incron to run now and also on startup, you have to do this:
+
+```
+systemctl start incrond.service
+systemctl enable incrond.service
+```
+
+I think that's everything. It's a total hack but it works.
 
 ## TO-DO
-I've put my own specific paths in silvercheetah.c and I need to change that so that anyone can set them in config.
-
+I've put my own specific paths in `silvercheetah.c` and I need to change that so that anyone can set them in config.
+Also, it would be nice if I wrote a script to set up all of the above nonsense so it was easier for someone else to use.
