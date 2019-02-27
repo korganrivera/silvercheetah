@@ -8,17 +8,16 @@ I specifically use this code with the following equipment:
 
 Silvercheetah can do the following:
 * scan a folder for Wahoo csv files
-* strip speed values from each file
-* calculate FTP and TSS from speed values
+* calculate NP, FTP, IF, and TSS from speed values
 * interpolates missing workouts
 * calculate ATL, CTL, TSB from TSS values
 * write these to tss.log
 
 I've set my Wahoo Fitness app to share csv files to a folder in Dropbox.
 
-Silvercheetah can be set to run with inotify or cron.
+Silvercheetah can be set to run automatically with `incron` when new files are uploaded.
 
-tss.log can be displayed using gnuplot if you want.
+tss.log data can be displayed using gnuplot if you want.
 
 ## HOW TO USE
 * run `./silvercheetah`
@@ -28,7 +27,7 @@ tss.log can be displayed using gnuplot if you want.
 * Files found will be processed and a tss.log will be created.
 
 ### What can I do with tss.log?
-tss.log contains virtual power calculations using speed data taken from your wahoo csv files. It contains values for FTP, TSS, CTL, ATL, TSB. This file can be plotted using gnuplot or whatever so you can view your training progress in a graph. You'll then be able to use this data to decide what your fitness level is, how much fatigue you can handle before burnout, and your daily TSS goals to improve your fitness as efficiently as possible.
+tss.log contains virtual power calculations using speed data taken from your wahoo csv files. It contains a unix timestamp, NP, FTP, IF, TSS, CTL, ATL, and TSB. This file can be plotted using gnuplot or whatever so you can view your training progress in a graph. You'll then be able to use this data to decide what your fitness level is, how much fatigue you can handle before burnout, and your daily TSS goals to improve your fitness as efficiently as possible.
 
 ### Can I use this code for training done with a different bike trainer?
 Nope. The calculations are specifically tailored to the Kinetic Road Machine.
@@ -42,14 +41,11 @@ Nope. The code expects the files to be of that specific format.
 ### How do I get csv files from the Wahoo Fitness app?
 Once you've completed your workout with the Wahoo Fitness app, scroll to the bottom of your workout summary and click the 'share' icon. Choose 'csv'. You'll then be asked where to save it. I choose a folder in my Dropbox. Put the path of your files in the `config` file.
 
+### How are you calculating FTP without an FTP test?
+Look at each ride before the current ride. In each of those rides, find the highest power produced over a duration of 20 minutes. Multiply this by 0.95. This is your estimated FTP.
+
 ### This code sucks.
 ikr. But if you have the same equipment that I do, it beats paying a subscription just to get the same data. :)
-
-### How can I plot tss.log with gnuplot?
-* install gnuplot
-* run `gnuplot`
-* enter `set datafile separator ","`
-* enter `plot 'tss.log' u 1:4 w l title 'CTL (fitness)', 'tss.log' u 1:5 w l title 'ATL (fatigue)', 'tss.log' u 1:6 w l title 'TSB (freshness)'`
 
 ## How I get everything to run correctly
 I personally run this code using a script that runs `silvercheetah`
@@ -103,3 +99,7 @@ I think that's everything. It's a total hack but it works.
 ## TO-DO
 I've put my own specific paths in `silvercheetah.c` and I need to change that so that anyone can set them in config.
 Also, it would be nice if I wrote a script to set up all of the above nonsense so it was easier for someone else to use.
+
+After that, I need to write another program that will be like your coach. It will tell you where you currently are in your training, and what you need to do next as far as TSS. I've written a modelling function that can match TSS to time and speed on the bike, so once it calculates how much TSS you need today, it can also recommend a duration and speed to work at to obtain it. This will be a separate program from silvercheetah since silvercheetah ran run on its own without intervention. You should also be able to set goals and have it taper your workout on approach to these.
+
+Need to refactor my code also. There's some repetition I think I could avoid.
