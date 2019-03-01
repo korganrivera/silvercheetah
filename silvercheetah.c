@@ -309,7 +309,6 @@ int main(int argc, char **argv){
     if(difference > 1)
         appendage = difference - 1;
 
-puts("TOP");
     // Create yet another array to hold the appendage entries.
     if(appendage > 0){
         if((new_ts = malloc((array_size + appendage) * sizeof(long long unsigned))) == NULL){ printf("malloc failed.\n"); exit(1); }
@@ -338,7 +337,6 @@ puts("TOP");
         llu_temp = ts;
         ts = new_ts;
         free(llu_temp);
-puts("BOTTOM");
 
         double *d_temp;
         d_temp = np;
@@ -372,6 +370,19 @@ puts("BOTTOM");
             ftp[i] = file_ftp[i];
         else
             ftp[i] = ftp[i - 1];
+    }
+
+    // improve FTP estimate by linear-interpolating the high values.
+    unsigned left = 0;
+    for(i = 1; i < array_size; i++){
+        if(ftp[i] > ftp[left]){
+            // interpolate between ftp[left] and ftp[i].
+            unsigned gap = i - left;
+            double change = (ftp[i] - ftp[left]) / gap;
+            for(left = left + 1; left < i; left++){
+                ftp[left] = ftp[left - 1] + change;
+            }
+        }
     }
 
     // calculate IF.
