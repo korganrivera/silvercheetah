@@ -19,12 +19,19 @@ Silvercheetah can be set to run automatically with `incron` when new files are u
 
 tss.log data can be displayed using gnuplot if you want.
 
+I also use the following to get everything to run like I like it:
+* Arch
+* systemd
+* notify-send
+* incron
+
 ## HOW TO USE
 * run `./silvercheetah`
 * silvercheetah will create a config file for you to edit.
 * put the path of your wahoo files in the config file.
 * run `./silvercheetah`
 * Files found will be processed and a tss.log will be created.
+
 
 ### What can I do with tss.log?
 tss.log contains virtual power calculations using speed data taken from your wahoo csv files. It contains a unix timestamp, NP, FTP, IF, TSS, CTL, ATL, and TSB. This file can be plotted using gnuplot or whatever so you can view your training progress in a graph. You'll then be able to use this data to decide what your fitness level is, how much fatigue you can handle before burnout, and your daily TSS goals to improve your fitness as efficiently as possible.
@@ -95,6 +102,9 @@ systemctl enable incrond.service
 ```
 
 I think that's everything. It's a total hack but it works.
+
+EDIT: one more thing. Doing the above like I did it, silvercheetah will run everytime you upload or remove a csv file from the Wahoo app. However, if you go a few days without working out, silvecheetah won't update the tss.log to show this unless you either run it manually or set it up to also run after midnight using cron, or something like cron. So you'd have both cron and incron running things. That seems like the best way if you need tss.log completely current at all times.
+
 
 ## TO-DO
 I've put my own specific paths in `silvercheetah.c` and I need to change that so that anyone can set them in config.

@@ -2,7 +2,6 @@
 *~
 *.out
 silvercheetah
-freshcheetah
-.files_old
 tss.log
+config
 silvercheetah_old.c
