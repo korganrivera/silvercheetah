@@ -113,3 +113,4 @@ Also, it would be nice if I wrote a script to set up all of the above nonsense s
 After that, I need to write another program that will be like your coach. It will tell you where you currently are in your training, and what you need to do next as far as TSS. I've written a modelling function that can match TSS to time and speed on the bike, so once it calculates how much TSS you need today, it can also recommend a duration and speed to work at to obtain it. This will be a separate program from silvercheetah since silvercheetah ran run on its own without intervention. You should also be able to set goals and have it taper your workout on approach to these.
 
 Need to refactor my code also. There's some repetition I think I could avoid.
+
