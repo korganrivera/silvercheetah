@@ -39,6 +39,7 @@ int rolling_average(double* array, double* target, unsigned n, unsigned interval
         else
             target[i] = (target[i - 1] * interval + array[i] - array[i - interval]) / interval;
     }
+    return 1;
 }
 
 int main(int argc, char **argv){
@@ -55,11 +56,8 @@ int main(int argc, char **argv){
 
     long long unsigned *ts, *new_ts;
 
-    double *np, *file_ftp, *ftp, *ifact, *tss;
-    double *atl, *ctl, *tsb, *new_ftp, *new_np;
-    double *new_file_ftp, *new_ifact, *new_tss;
-    double *new_atl, *new_ctl, *new_tsb, *mps;
-    double *ra, NP, FTP, IF, TSS;
+    double *np, *file_ftp, *ftp, *ifact, *tss, *atl, *ctl;
+    double *tsb, *new_np, *new_file_ftp, *mps, *ra;
 
     // open config file.
     if((fp = fopen(CONFIG_PATH,"r")) == NULL){
@@ -406,7 +404,7 @@ int main(int argc, char **argv){
     if((fp = fopen(TSS_LOG_PATH,"w")) == NULL){ fprintf(stderr, "Can't open tss.log"); exit(1); }
     fprintf(fp, "TIMESTAMP |  NP   | secs |  FTP  | IF  |  TSS  |  CTL  |  ATL  |  TSB\n");
     for(i = 0; i < array_size; i++){
-    fprintf(fp, "%-10llu %7.3lf %5u %7.3lf %5.3lf %7.3lf %7.3lf %7.3lf %6.3lf", ts[i], np[i], duration[i], ftp[i], ifact[i], tss[i], ctl[i], atl[i], tsb[i]);
+    fprintf(fp, "%-10llu %7.3lf %6u %7.3lf %5.3lf %7.3lf %7.3lf %7.3lf %6.3lf", ts[i], np[i], duration[i], ftp[i], ifact[i], tss[i], ctl[i], atl[i], tsb[i]);
         if(i < array_size - 1)
             fputc('\n', fp);
     }
