@@ -32,7 +32,7 @@ int rolling_average(double* array, double* target, unsigned n, unsigned interval
     for(unsigned i = 0; i < n; i++){
         if(i < interval){
             if(i == 0)
-                    target[i] = array[i];
+                target[i] = array[i];
             else
                 target[i] = (target[i - 1] * i + array[i]) / (i + 1);
         }
