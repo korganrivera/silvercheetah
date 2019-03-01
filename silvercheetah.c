@@ -81,12 +81,9 @@ int main(int argc, char **argv){
 
     printf("folder location: %s\n", folder_location);
 
-    // build the find command.
+    // build the find command and run it.
     strcat(find_command, folder_location);
     strcat(find_command, " -maxdepth 1 -type f > /home/korgan/code/silvercheetah/filelist");
-
-    // Make list of current files in the target folder.
-    //printf("running this command: %s", find_command);
     system(find_command);
 
     // Count lines in filelist.
@@ -100,6 +97,7 @@ int main(int argc, char **argv){
             filecount++;
     rewind(fp);
 
+    // if no files found, clean up and exit.
     if(filecount == 0){
         fclose(fp);
         puts("no files, nothing to do. cleaning up.");
@@ -113,8 +111,8 @@ int main(int argc, char **argv){
     }
     printf("%u files found\n", filecount);
 
-    array_size = filecount;
     // allocate space for all the things.
+    array_size = filecount;
     if((ts       = malloc(array_size * sizeof(long long unsigned))) == NULL){ printf("malloc failed.\n"); exit(1); }
     if((np       = malloc(array_size * sizeof(double))) == NULL){ printf("malloc failed.\n"); exit(1); }
     if((duration = malloc(array_size * sizeof(unsigned))) == NULL){ printf("malloc failed.\n"); exit(1); }
@@ -201,7 +199,6 @@ int main(int argc, char **argv){
         }
         free(ra);
         file_ftp[i] *= 0.95;
-
     }
     fclose(fp);
     system("rm /home/korgan/code/silvercheetah/filelist");
@@ -247,7 +244,6 @@ int main(int argc, char **argv){
 
     // create an interpolated array.
     if(interpolation_count > 0){
-
         if((new_ts = malloc((array_size + interpolation_count) * sizeof(long long unsigned))) == NULL){ printf("malloc failed.\n"); exit(1); }
         if((new_np = malloc((array_size + interpolation_count) * sizeof(double))) == NULL){ printf("malloc failed.\n"); exit(1); }
         if((new_duration = malloc((array_size + interpolation_count) * sizeof(unsigned))) == NULL){ printf("malloc failed.\n"); exit(1); }
@@ -259,7 +255,8 @@ int main(int argc, char **argv){
         new_duration[0] = duration[0];
         new_file_ftp[0] = file_ftp[0];
 
-        for(i = 1,  j = 1; i < array_size; i++, j++){
+        // Interpolate gaps between timestamps.
+        for(i = 1, j = 1; i < array_size; i++, j++){
             unsigned day_diff = ts[i] / 86400 - ts[i - 1] / 86400;
             if(day_diff > 1){
                 for(k = 0; k < day_diff - 1; j++, k++){
@@ -280,15 +277,15 @@ int main(int argc, char **argv){
         ts = new_ts;
         free(llu_temp);
 
-        double *d_temp;
-        d_temp = np;
-        np = new_np;
-        free(d_temp);
-
         unsigned *u_temp;
         u_temp = duration;
         duration = new_duration;
         free(u_temp);
+
+        double *d_temp;
+        d_temp = np;
+        np = new_np;
+        free(d_temp);
 
         d_temp = file_ftp;
         file_ftp = new_file_ftp;
@@ -336,15 +333,15 @@ int main(int argc, char **argv){
         ts = new_ts;
         free(llu_temp);
 
-        double *d_temp;
-        d_temp = np;
-        np = new_np;
-        free(d_temp);
-
         unsigned *u_temp;
         u_temp = duration;
         duration = new_duration;
         free(u_temp);
+
+        double *d_temp;
+        d_temp = np;
+        np = new_np;
+        free(d_temp);
 
         d_temp = file_ftp;
         file_ftp = new_file_ftp;
@@ -425,5 +422,4 @@ int main(int argc, char **argv){
     free(ctl);
     free(atl);
     free(tsb);
-
 }
