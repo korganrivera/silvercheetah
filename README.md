@@ -113,8 +113,6 @@ So, install fcron, enable and start that in systemctl, then add this line to you
 ```
 I think that's everything. It's a total hack but it works.
 
-EDIT: one more thing. Doing the above like I did it, silvercheetah will run everytime you upload or remove a csv file from the Wahoo app. However, if you go a few days without working out, silvecheetah won't update the tss.log to show this unless you either run it manually or set it up to also run after midnight using cron, or something like cron. So you'd have both cron and incron running things. That seems like the best way if you need tss.log completely current at all times.
-
 ## TO-DO
 I've put my own specific paths in `silvercheetah.c` and I need to change that so that anyone can set them in config.
 Also, it would be nice if I wrote a script to set up all of the above nonsense so it was easier for someone else to use.
