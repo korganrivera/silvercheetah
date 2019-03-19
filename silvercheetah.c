@@ -88,7 +88,7 @@ int main(int argc, char **argv){
 
     // Count lines in filelist.
     if((fp = fopen("/home/korgan/code/silvercheetah/filelist","r")) == NULL){
-        printf("can't open filelist\n");
+        puts("can't open filelist");
         exit(1);
     }
     filecount = 0;
@@ -113,10 +113,10 @@ int main(int argc, char **argv){
 
     // allocate space for all the things.
     array_size = filecount;
-    if((ts       = malloc(array_size * sizeof(long long unsigned))) == NULL){ printf("malloc failed.\n"); exit(1); }
-    if((np       = malloc(array_size * sizeof(double))) == NULL){ printf("malloc failed.\n"); exit(1); }
-    if((duration = malloc(array_size * sizeof(unsigned))) == NULL){ printf("malloc failed.\n"); exit(1); }
-    if((file_ftp = malloc(array_size * sizeof(double))) == NULL){ printf("malloc failed.\n"); exit(1); }
+    if((ts       = malloc(array_size * sizeof(long long unsigned))) == NULL){ puts("malloc failed."); exit(1); }
+    if((np       = malloc(array_size * sizeof(double))) == NULL){   puts("malloc failed."); exit(1); }
+    if((duration = malloc(array_size * sizeof(unsigned))) == NULL){ puts("malloc failed."); exit(1); }
+    if((file_ftp = malloc(array_size * sizeof(double))) == NULL){   puts("malloc failed."); exit(1); }
 
     // process files in newlist, put results into arrays.
     for(i = 0; i < array_size; i++){
@@ -139,7 +139,7 @@ int main(int argc, char **argv){
         while((c = fgetc(wahoo_file)) != '\n' && c != EOF);
 
         // malloc space for mps values.
-        if((mps = malloc(duration[i] * sizeof(double))) == NULL){ fprintf(stderr, "malloc failed.\n"); exit(1); }
+        if((mps = malloc(duration[i] * sizeof(double))) == NULL){ puts("malloc failed."); exit(1); }
 
         // Grab the first timestamp while I'm here.
         fscanf(wahoo_file,"%llu", &ts[i]);
@@ -175,7 +175,7 @@ int main(int argc, char **argv){
         }
 
         // malloc space for rolling average values.
-        if((ra = malloc(duration[i] * sizeof(double))) == NULL){ fprintf(stderr, "malloc failed.\n"); exit(1); }
+        if((ra = malloc(duration[i] * sizeof(double))) == NULL){ puts("malloc failed."); exit(1); }
 
         // Calculate 30-sec rolling average for NP.
         rolling_average(mps, ra, duration[i], 30);
@@ -237,17 +237,17 @@ int main(int argc, char **argv){
     // calculate how many interpolations I need.
     unsigned interpolation_count = 0;
     for(i = 1; i < array_size; i++){
-        unsigned day_diff = ts[i] / 86400 - ts[i - 1] / 86400;
+        unsigned day_diff = (ts[i] - ts[i - 1]) / 86400;
         if(day_diff > 1)
             interpolation_count += day_diff - 1;
     }
 
     // create an interpolated array.
     if(interpolation_count > 0){
-        if((new_ts = malloc((array_size + interpolation_count) * sizeof(long long unsigned))) == NULL){ printf("malloc failed.\n"); exit(1); }
-        if((new_np = malloc((array_size + interpolation_count) * sizeof(double))) == NULL){ printf("malloc failed.\n"); exit(1); }
-        if((new_duration = malloc((array_size + interpolation_count) * sizeof(unsigned))) == NULL){ printf("malloc failed.\n"); exit(1); }
-        if((new_file_ftp = malloc((array_size + interpolation_count) * sizeof(double))) == NULL){ printf("malloc failed.\n"); exit(1); }
+        if((new_ts = malloc((array_size + interpolation_count) * sizeof(long long unsigned))) == NULL){ puts("malloc failed."); exit(1); }
+        if((new_np = malloc((array_size + interpolation_count) * sizeof(double))) == NULL){ puts("malloc failed."); exit(1); }
+        if((new_duration = malloc((array_size + interpolation_count) * sizeof(unsigned))) == NULL){ puts("malloc failed."); exit(1); }
+        if((new_file_ftp = malloc((array_size + interpolation_count) * sizeof(double))) == NULL){ puts("malloc failed.n"); exit(1); }
 
         // Copy first value over because that one is fine.
         new_ts[0]       = ts[0];
@@ -257,7 +257,7 @@ int main(int argc, char **argv){
 
         // Interpolate gaps between timestamps.
         for(i = 1, j = 1; i < array_size; i++, j++){
-            unsigned day_diff = ts[i] / 86400 - ts[i - 1] / 86400;
+            unsigned day_diff = (ts[i] - ts[i - 1]) / 86400;
             if(day_diff > 1){
                 for(k = 0; k < day_diff - 1; j++, k++){
                     new_ts[j] = new_ts[j - 1] / 86400 * 86400 + 86400;
@@ -306,10 +306,10 @@ int main(int argc, char **argv){
 
     // Create yet another array to hold the appendage entries.
     if(appendage > 0){
-        if((new_ts = malloc((array_size + appendage) * sizeof(long long unsigned))) == NULL){ printf("malloc failed.\n"); exit(1); }
-        if((new_np       = malloc((array_size + appendage) * sizeof(double))) == NULL){ printf("malloc failed.\n"); exit(1); }
-        if((new_duration = malloc((array_size + appendage) * sizeof(unsigned))) == NULL){ printf("malloc failed.\n"); exit(1); }
-        if((new_file_ftp = malloc((array_size + appendage) * sizeof(double))) == NULL){ printf("malloc failed.\n"); exit(1); }
+        if((new_ts = malloc((array_size + appendage) * sizeof(long long unsigned))) == NULL){ puts("malloc failed."); exit(1); }
+        if((new_np       = malloc((array_size + appendage) * sizeof(double))) == NULL){ puts("malloc failed.n"); exit(1); }
+        if((new_duration = malloc((array_size + appendage) * sizeof(unsigned))) == NULL){ puts("malloc failed.n"); exit(1); }
+        if((new_file_ftp = malloc((array_size + appendage) * sizeof(double))) == NULL){ puts("malloc failed.n"); exit(1); }
 
         // copy array over.
         for(i = 0; i < array_size; i++){
@@ -351,12 +351,12 @@ int main(int argc, char **argv){
     }
 
     // malloc space for next set of calculations.
-    if((ftp      = malloc(array_size * sizeof(double))) == NULL){ printf("malloc failed.\n"); exit(1); }
-    if((ifact    = malloc(array_size * sizeof(double))) == NULL){ printf("malloc failed.\n"); exit(1); }
-    if((tss      = malloc(array_size * sizeof(double))) == NULL){ printf("malloc failed.\n"); exit(1); }
-    if((ctl      = malloc(array_size * sizeof(double))) == NULL){ printf("malloc failed.\n"); exit(1); }
-    if((atl      = malloc(array_size * sizeof(double))) == NULL){ printf("malloc failed.\n"); exit(1); }
-    if((tsb      = malloc(array_size * sizeof(double))) == NULL){ printf("malloc failed.\n"); exit(1); }
+    if((ftp      = malloc(array_size * sizeof(double))) == NULL){ puts("malloc failed."); exit(1); }
+    if((ifact    = malloc(array_size * sizeof(double))) == NULL){ puts("malloc failed."); exit(1); }
+    if((tss      = malloc(array_size * sizeof(double))) == NULL){ puts("malloc failed."); exit(1); }
+    if((ctl      = malloc(array_size * sizeof(double))) == NULL){ puts("malloc failed."); exit(1); }
+    if((atl      = malloc(array_size * sizeof(double))) == NULL){ puts("malloc failed."); exit(1); }
+    if((tsb      = malloc(array_size * sizeof(double))) == NULL){ puts("malloc failed."); exit(1); }
 
     // calculate table_ftp: current ftp will be highest ftp before current.
     ftp[0] = file_ftp[0];
@@ -398,7 +398,7 @@ int main(int argc, char **argv){
         tsb[i] = ctl[i] - atl[i];
 
     // write arrays to tss.log
-    if((fp = fopen(TSS_LOG_PATH,"w")) == NULL){ fprintf(stderr, "Can't open tss.log"); exit(1); }
+    if((fp = fopen(TSS_LOG_PATH,"w")) == NULL){ puts("Can't open tss.log"); exit(1); }
     fprintf(fp, "TIMESTAMP |  NP   | secs |  FTP  | IF  |  TSS  |  CTL  |  ATL  |  TSB\n");
     for(i = 0; i < array_size; i++){
     fprintf(fp, "%-10llu %7.3lf %6u %7.3lf %5.3lf %7.3lf %7.3lf %7.3lf %6.3lf", ts[i], np[i], duration[i], ftp[i], ifact[i], tss[i], ctl[i], atl[i], tsb[i]);
