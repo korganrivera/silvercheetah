@@ -310,7 +310,7 @@ int main(int argc, char **argv){
     // calculate how many appendage entries I need.
     long long unsigned current_time = time(NULL) / 86400;
     long long unsigned last_time = ts[array_size - 1] / 86400;
-    unsigned appendage = current_time - last_time;
+    unsigned appendage = current_time - last_time - 1;
 
     // Create yet another array to hold the appendage entries.
     if(appendage > 0){
