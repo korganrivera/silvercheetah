@@ -1,22 +1,35 @@
 /* Thu Feb 21 15:39:49 CST 2019
  * Wahoo .csv file processing code.
  * For more details, read README.md.
- * compile with: gcc silvercheetah.c -o silvercheetah -lm
+ * either use make, or compile with: gcc silvercheetah.c -o silvercheetah -lm
  *
  * New order of operations to fix my FTP numbers:
  * for each file:
- *  get timestamp
- *  get time in secs
- *  calculate NP
- *  calculate file's FTP (This is different from table's FTP)
+ *   get timestamp
+ *   get time in secs
+ *   calculate NP
+ *   calculate file's FTP (This is different from table's FTP)
  * with table:
- *  calculate table's FTP
- *  calculate IF
- *  calculate TSS
- *  ATL, CTL, TSB
+ *   calculate table's FTP
+ *   calculate IF
+ *   calculate TSS
+ *   ATL, CTL, TSB
  * write to tss.log:
- *  timestamp, NP, duration, FTP, IF, TSS
+ *   timestamp, NP, duration, FTP, IF, TSS
  *
+ *   There's an issue with the timestamps.
+ *   All timestamps are in UTC and don't include any info about daylight savings time.
+ *   So, for example, these two timestamps:
+ *                   my time zone              UTC
+ *   1552752597    3-16-19 11:09:57    3-16-19 16:09:57 UTC
+ *   1552875565    3-17-19 21:19:25    3-18-19 02:19:25 UTC
+ *
+ *   So according to my time zone, these two timestamps occur on days that
+ *   follow each other.  But according to UTC, they are two days apart.
+ *
+ *   It actually makes more sense to use UTC since it is consistent, but it
+ *   will seem confusing when the tss.log says there is a 2-day difference
+ *   between workouts when there looks like only one in your time zone.
 */
 
 #include <stdio.h>
@@ -222,7 +235,6 @@ int main(int argc, char **argv){
                 np[i] = np[lowest];
                 np[lowest] = d_temp;
 
-                //unsigned u_temp;
                 u_temp = duration[i];
                 duration[i] = duration[lowest];
                 duration[lowest] = u_temp;
@@ -237,9 +249,10 @@ int main(int argc, char **argv){
     // calculate how many interpolations I need.
     unsigned interpolation_count = 0;
     for(i = 1; i < array_size; i++){
-        unsigned day_diff = (ts[i] - ts[i - 1]) / 86400;
-        if(day_diff > 1)
+        unsigned day_diff = (ts[i] / 86400) - (ts[i - 1] / 86400);
+        if(day_diff > 1){
             interpolation_count += day_diff - 1;
+        }
     }
 
     // create an interpolated array.
@@ -257,7 +270,7 @@ int main(int argc, char **argv){
 
         // Interpolate gaps between timestamps.
         for(i = 1, j = 1; i < array_size; i++, j++){
-            unsigned day_diff = (ts[i] - ts[i - 1]) / 86400;
+            unsigned day_diff = (ts[i] / 86400) - (ts[i - 1] / 86400);
             if(day_diff > 1){
                 for(k = 0; k < day_diff - 1; j++, k++){
                     new_ts[j] = new_ts[j - 1] / 86400 * 86400 + 86400;
@@ -295,14 +308,9 @@ int main(int argc, char **argv){
     }
 
     // calculate how many appendage entries I need.
-    long long unsigned current_time = time(NULL);
-    long long unsigned last_time = ts[array_size - 1];
-    current_time /= 86400;
-    last_time /= 86400;
-    unsigned difference = current_time - last_time;
-    unsigned appendage = 0;
-    if(difference > 1)
-        appendage = difference - 1;
+    long long unsigned current_time = time(NULL) / 86400;
+    long long unsigned last_time = ts[array_size - 1] / 86400;
+    unsigned appendage = current_time - last_time;
 
     // Create yet another array to hold the appendage entries.
     if(appendage > 0){
