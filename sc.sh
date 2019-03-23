@@ -3,4 +3,4 @@ if [ -r ~/.dbus/Xdbus ]; then
   . ~/.dbus/Xdbus
 fi
 /home/korgan/code/silvercheetah/silvercheetah
-notify-send "I am the cheetah!"
+notify-send "SILVERCHEETAH" "I am the cheetah!" --icon=starred
