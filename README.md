@@ -75,7 +75,7 @@ create ~/silvercheetah/sc.sh. This is a script that will run silvercheetah and n
 if [ -r ~/.dbus/Xdbus ]; then
   . ~/.dbus/Xdbus
 fi
-~/silvercheetah
+~/silvercheetah/silvercheetah
 notify-send "I am the cheetah!"
 ```
 create ~/bin/dbus_sc.sh. This dbus stuff is needed so the script can push notify-send messages to the screen.
@@ -118,3 +118,5 @@ I've put my own specific paths in `silvercheetah.c` and I need to change that so
 Also, it would be nice if I wrote a script to set up all of the above nonsense so it was easier for someone else to use.
 Need to refactor my code also. There's some repetition I think I could avoid.
 
+## Issues
+So this isn't a big deal but all the timestamps are in UTC and I don't do any local time conversion or account for Daylight Saving Time. This means that if you, say, do a workout one morning and do another workout the next night, they might show up in your tss.log as happening a whole day apart even though in your timezone they happened on consecutive days. But what happened is that a whole day in UTC time occured between those workouts. If this bothers you, go ahead and fork the code and write your own local time handling routines; I'm probably not going to fix this.
