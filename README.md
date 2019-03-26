@@ -64,35 +64,20 @@ Put the repository in there, and run `make`. Then run ./silvercheetah manually o
 
 Once that's successful, follow these steps to get silvercheetah to run autonomously:
 
-Make this folder
-`mkdir ~/.dbus`
-
+### notify-send
 Install notify-send if you haven't already if you want on-screen notifications when silvercheetah detects your file changes. (recommended)
 
-create ~/silvercheetah/sc.sh. This is a script that will run silvercheetah and notify-send.
+Edit sc.sh. This is a script that will run silvercheetah and notify-send.
 ```
 #!/bin/sh
-if [ -r ~/.dbus/Xdbus ]; then
-  . ~/.dbus/Xdbus
-fi
 ~/silvercheetah/silvercheetah
-notify-send "I am the cheetah!"
-```
-create ~/bin/dbus_sc.sh. This dbus stuff is needed so the script can push notify-send messages to the screen.
-```
-#!/bin/sh
-touch $HOME/.dbus/Xdbus
-chmod 600 $HOME/.dbus/Xdbus
-env | grep DBUS_SESSION_BUS_ADDRESS > $HOME/.dbus/Xdbus
-echo 'export DBUS_SESSION_BUS_ADDRESS' >> $HOME/.dbus/Xdbus
-exit 0
-```
-Add this to your autostart. With Openbox, I do this:
+sudo -u <user> DISPLAY=:0 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/<user-id>/bus notify-send "SILVERCHEETAH" "I am the cheetah!" --icon=starred
 
-in `~/.config/openbox/autostart`:
+```
+Replace *user* and *user-id* in the above script with your username and your user id. (run `whoami` and `id` to find those.)
 
-`~/bin/dbus_sc.sh &`
-
+### incron
+Incron will run sc.sh every time a file in your watched folder is added, deleted, or modified.
 If you don't have incron installed already, do that. Make sure it will run now and on startup. With systemd, I do this
 ```
 systemctl start incrond.service
@@ -100,19 +85,17 @@ systemctl enable incrond.service
 ```
 Add this line to your incrontab:
 ```
-/home/korgan/Dropbox/cycling_files/csv_files	IN_MODIFY,IN_CREATE,IN_DELETE,IN_MOVE	~/silvercheetah/sc.sh
+<location of your Wahoo files>	IN_MODIFY,IN_CREATE,IN_DELETE,IN_MOVE	~/silvercheetah/sc.sh
 ```
-Obviously this is the line I use. Change the above so that it uses the path that you keep your csv files in.
-
 Now your tss.log will update every time a file is added, deleted, or changed. However, I also want it to update at midnight just in case I skipped a workout. I also want this to happen reliably if the laptop has been shutdown at any point. For this, I use fcron.
-So, install fcron, enable and start that in systemctl, then add this line to your fcrontab:
+
+### fcron
+Install fcron, enable and start that in systemctl, then add this line to your fcrontab:
 ```
 # run silvercheetah at midnight so cycling off-days are appended
 0 0 * * * /home/korgan/code/silvercheetah/sc.sh
 @reboot /home/korgan/code/silvercheetah/sc.sh
 ```
-I think that's everything. It's a total hack but it works.
-
 ## TO-DO
 I've put my own specific paths in `silvercheetah.c` and I need to change that so that anyone can set them in config.
 Also, it would be nice if I wrote a script to set up all of the above nonsense so it was easier for someone else to use.
