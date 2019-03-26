@@ -35,7 +35,7 @@ I also use the following to get everything to run like I like it:
 * run `./silvercheetah`
 * Files found will be processed and a tss.log will be created.
 
-To automate silvercheetah, follow the instructions below.
+To automate silvercheetah, follow the instructions [below][2].
 
 ### What can I do with tss.log?
 tss.log contains virtual power calculations using speed data taken from your wahoo csv files. It contains a unix timestamp, NP, FTP, IF, TSS, CTL, ATL, and TSB. This file can be plotted using gnuplot or whatever so you can view your training progress in a graph. You'll then be able to use this data to decide what your fitness level is, how much fatigue you can handle before burnout, and your daily TSS goals to improve your fitness as efficiently as possible. tss.log can also be further processed with [cyclecoach][1].
@@ -105,3 +105,4 @@ Need to refactor my code also. There's some repetition I think I could avoid.
 So this isn't a big deal but all the timestamps are in UTC and I don't do any local time conversion or account for Daylight Saving Time. This means that if you, say, do a workout one morning and do another workout the next night, they might show up in your tss.log as happening a whole day apart even though in your timezone they happened on consecutive days. But what happened is that a whole day in UTC time occured between those workouts. If this bothers you, go ahead and fork the code and write your own local time handling routines; I'm probably not going to fix this.
 
 [1]: https://github.com/korganrivera/cyclecoach
+[2]: https://github.com/korganrivera/silvercheetah#how-i-get-everything-to-run-automatically
