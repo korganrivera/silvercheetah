@@ -98,7 +98,7 @@ Install fcron, enable and start that in systemctl, then add this line to your fc
 ```
 ## TO-DO
 I've put my own specific paths in `silvercheetah.c` and I need to change that so that anyone can set them in config.
-Also, it would be nice if I wrote a script to set up all of the above nonsense so it was easier for someone else to use.
+Also, it would be nice if I wrote a script to set up all of the above stuff so it was easier for someone else to use.
 Need to refactor my code also. There's some repetition I think I could avoid.
 
 ## Issues
