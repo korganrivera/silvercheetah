@@ -17,7 +17,6 @@
  * write to tss.log:
  *   timestamp, NP, duration, FTP, IF, TSS
  *
- *   There's an issue with the timestamps.
  *   All timestamps are in UTC and don't include any info about daylight savings time.
  *   So, for example, these two timestamps:
  *                   my time zone              UTC
