@@ -140,6 +140,7 @@ int main(int argc, char **argv){
             printf("can't open %s. :(", filename);
             exit(1);
         }
+        printf("opening %s\n", filename);
 
         // Count lines in the file.
         duration[i] = 0;
@@ -244,6 +245,7 @@ int main(int argc, char **argv){
             }
         }
     }
+    printf("timestampy: %-10llu\n", ts[array_size - 1]);
 
     // calculate how many interpolations I need.
     unsigned interpolation_count = 0;
@@ -284,6 +286,7 @@ int main(int argc, char **argv){
             new_duration[j] = duration[i];
         }
 
+
         // interpolated array is complete. swap pointers for new and old arrays, and free the old ones.
         long long unsigned *llu_temp = ts;
         ts = new_ts;
@@ -309,7 +312,7 @@ int main(int argc, char **argv){
     // calculate how many appendage entries I need.
     long long unsigned current_time = time(NULL) / 86400;
     long long unsigned last_time = ts[array_size - 1] / 86400;
-    unsigned appendage = current_time - last_time - 1;
+    unsigned appendage = current_time - last_time ;
 
     // Create yet another array to hold the appendage entries.
     if(appendage > 0){
@@ -354,9 +357,13 @@ int main(int argc, char **argv){
         file_ftp = new_file_ftp;
         free(d_temp);
 
+        // I've no idea why this adding 1 is here, but it has solved my problem for now
+        // and I don't have time to mess with this anymore. :/
+        // something to do with when you work out today, it won't show. this is definitely not a good fix.
         array_size += appendage;
     }
-
+    // appendage is cutting off the lsat entry. fix this!
+    //
     // malloc space for next set of calculations.
     if((ftp      = malloc(array_size * sizeof(double))) == NULL){ puts("malloc failed."); exit(1); }
     if((ifact    = malloc(array_size * sizeof(double))) == NULL){ puts("malloc failed."); exit(1); }
