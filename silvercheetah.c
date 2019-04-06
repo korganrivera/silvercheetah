@@ -312,7 +312,14 @@ int main(int argc, char **argv){
     // calculate how many appendage entries I need.
     long long unsigned current_time = time(NULL) / 86400;
     long long unsigned last_time = ts[array_size - 1] / 86400;
-    unsigned appendage = current_time - last_time ;
+    unsigned appendage = current_time - last_time;
+
+    // Don't add a blank entry for today since I could still work out.
+    if(appendage == 1)
+        appendage = 0;
+    else appendage--;
+
+    printf("adding %u appendages!\n", appendage);
 
     // Create yet another array to hold the appendage entries.
     if(appendage > 0){
@@ -362,8 +369,7 @@ int main(int argc, char **argv){
         // something to do with when you work out today, it won't show. this is definitely not a good fix.
         array_size += appendage;
     }
-    // appendage is cutting off the lsat entry. fix this!
-    //
+
     // malloc space for next set of calculations.
     if((ftp      = malloc(array_size * sizeof(double))) == NULL){ puts("malloc failed."); exit(1); }
     if((ifact    = malloc(array_size * sizeof(double))) == NULL){ puts("malloc failed."); exit(1); }
