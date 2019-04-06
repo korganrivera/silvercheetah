@@ -317,7 +317,8 @@ int main(int argc, char **argv){
     // Don't add a blank entry for today since I could still work out.
     if(appendage == 1)
         appendage = 0;
-    else appendage--;
+    else if (appendage > 0)
+        appendage--;
 
     printf("adding %u appendages!\n", appendage);
 
