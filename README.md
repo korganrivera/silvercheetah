@@ -74,7 +74,7 @@ Edit sc.sh. This is a script that will run silvercheetah and notify-send.
 sudo -u **<user>** DISPLAY=:0 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/**<user-id>**/bus notify-send "SILVERCHEETAH" "I am the cheetah!" --icon=starred
 
 ```
-Replace **<user>** and **<user-id>** in the above script with your username and your user id. (run `whoami` and `id` to find those.)
+Replace **`<user>`** and **`<user-id>`** in the above script with your username and your user id. (run `whoami` and `id` to find those.)
 
 ### incron
 Incron will run sc.sh every time a file in your watched folder is added, deleted, or modified.
