@@ -37,8 +37,10 @@
 #include <math.h>
 #include <time.h>
 
-#define TSS_LOG_PATH "/home/korgan/code/silvercheetah/tss.log"
-#define CONFIG_PATH "/home/korgan/code/silvercheetah/config"
+//#define TSS_LOG_PATH "/home/korgan/code/silvercheetah/tss.log"
+#define TSS_LOG_PATH "tss.log"
+//#define CONFIG_PATH "/home/korgan/code/silvercheetah/config"
+#define CONFIG_PATH "./config"
 
 int rolling_average(double* array, double* target, unsigned n, unsigned interval){
     for(unsigned i = 0; i < n; i++){
@@ -95,11 +97,11 @@ int main(int argc, char **argv){
 
     // build the find command and run it.
     strcat(find_command, folder_location);
-    strcat(find_command, " -maxdepth 1 -type f > /home/korgan/code/silvercheetah/filelist");
+    strcat(find_command, " -maxdepth 1 -type f > ./filelist");
     system(find_command);
 
     // Count lines in filelist.
-    if((fp = fopen("/home/korgan/code/silvercheetah/filelist","r")) == NULL){
+    if((fp = fopen("./filelist","r")) == NULL){
         puts("can't open filelist");
         exit(1);
     }
@@ -113,7 +115,7 @@ int main(int argc, char **argv){
     if(filecount == 0){
         fclose(fp);
         puts("no files, nothing to do. cleaning up.");
-        system("rm /home/korgan/code/silvercheetah/filelist");
+        system("rm ./filelist");
         if((fp = fopen(TSS_LOG_PATH, "r")) != NULL){
             fclose(fp);
             strcat(rm_log_command, TSS_LOG_PATH);
@@ -214,7 +216,7 @@ int main(int argc, char **argv){
         file_ftp[i] *= 0.95;
     }
     fclose(fp);
-    system("rm /home/korgan/code/silvercheetah/filelist");
+    system("rm ./filelist");
 
     // selection sort the list, by timestamp.
     if(array_size > 1){
@@ -245,7 +247,6 @@ int main(int argc, char **argv){
             }
         }
     }
-    printf("timestampy: %-10llu\n", ts[array_size - 1]);
 
     // calculate how many interpolations I need.
     unsigned interpolation_count = 0;
@@ -365,9 +366,6 @@ int main(int argc, char **argv){
         file_ftp = new_file_ftp;
         free(d_temp);
 
-        // I've no idea why this adding 1 is here, but it has solved my problem for now
-        // and I don't have time to mess with this anymore. :/
-        // something to do with when you work out today, it won't show. this is definitely not a good fix.
         array_size += appendage;
     }
 
