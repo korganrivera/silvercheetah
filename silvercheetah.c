@@ -38,9 +38,7 @@
 #include <time.h>
 
 #define TSS_LOG_PATH "/home/korgan/code/silvercheetah/tss.log"
-//#define TSS_LOG_PATH "tss.log"
 #define CONFIG_PATH "/home/korgan/code/silvercheetah/config"
-//#define CONFIG_PATH "./config"
 
 int rolling_average(double* array, double* target, unsigned n, unsigned interval){
     for(unsigned i = 0; i < n; i++){
