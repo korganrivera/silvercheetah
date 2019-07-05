@@ -1,27 +1,16 @@
-/* Thu Feb 21 15:39:49 CST 2019
- * Wahoo .csv file processing code.
- * For more details, read README.md.
- * either use make, or compile with: gcc silvercheetah.c -o silvercheetah -lm
+/* Thu Feb 21 15:39:49 CST 2019 Wahoo .csv file processing code.  For more
+ * details, read README.md.  either use make, or compile with: gcc
+ * silvercheetah.c -o silvercheetah -lm
  *
- * New order of operations to fix my FTP numbers:
- * for each file:
- *   get timestamp
- *   get time in secs
- *   calculate NP
- *   calculate file's FTP (This is different from table's FTP)
- * with table:
- *   calculate table's FTP
- *   calculate IF
- *   calculate TSS
- *   ATL, CTL, TSB
- * write to tss.log:
- *   timestamp, NP, duration, FTP, IF, TSS
+ * New order of operations to fix my FTP numbers: for each file: get timestamp
+ * get time in secs calculate NP calculate file's FTP (This is different from
+ * table's FTP) with table: calculate table's FTP calculate IF calculate TSS
+ * ATL, CTL, TSB write to tss.log: timestamp, NP, duration, FTP, IF, TSS
  *
- *   All timestamps are in UTC and don't include any info about daylight savings time.
- *   So, for example, these two timestamps:
- *                   my time zone              UTC
- *   1552752597    3-16-19 11:09:57    3-16-19 16:09:57 UTC
- *   1552875565    3-17-19 21:19:25    3-18-19 02:19:25 UTC
+ *   All timestamps are in UTC and don't include any info about daylight
+ *   savings time.  So, for example, these two timestamps: my time zone
+ *   UTC 1552752597    3-16-19 11:09:57    3-16-19 16:09:57 UTC 1552875565
+ *   3-17-19 21:19:25    3-18-19 02:19:25 UTC
  *
  *   So according to my time zone, these two timestamps occur on days that
  *   follow each other.  But according to UTC, they are two days apart.
@@ -29,6 +18,10 @@
  *   It actually makes more sense to use UTC since it is consistent, but it
  *   will seem confusing when the tss.log says there is a 2-day difference
  *   between workouts when there looks like only one in your time zone.
+ *
+ *   I don't know how to use relative path names so that other people can use
+ *   my code, without screwing up the permissions for the scripts that run
+ *   this. Other than that, everything seems to work fine.
 */
 
 #include <stdio.h>
@@ -49,7 +42,9 @@ int rolling_average(double* array, double* target, unsigned n, unsigned interval
                 target[i] = (target[i - 1] * i + array[i]) / (i + 1);
         }
         else
-            target[i] = (target[i - 1] * interval + array[i] - array[i - interval]) / interval;
+            //target[i] = (target[i - 1] * interval + array[i] - array[i - interval]) / interval;
+            target[i] = target[i - 1] + (array[i] - array[i - interval]) / interval;
+
     }
     return 1;
 }
@@ -104,9 +99,10 @@ int main(int argc, char **argv){
         exit(1);
     }
     filecount = 0;
-    while((c = fgetc(fp)) != EOF)
-        if(c == '\n')
+    while(!feof(fp)){
+        if(fgetc(fp) == '\n')
             filecount++;
+    }
     rewind(fp);
 
     // if no files found, clean up and exit.
@@ -144,7 +140,10 @@ int main(int argc, char **argv){
 
         // Count lines in the file.
         duration[i] = 0;
-        while((c = fgetc(wahoo_file)) != EOF) if(c == '\n') duration[i]++;
+        while(!feof(wahoo_file)){
+            if(fgetc(wahoo_file) == '\n')
+                duration[i]++;
+        }
         duration[i]--;
         rewind(wahoo_file);
 
@@ -163,8 +162,7 @@ int main(int argc, char **argv){
             // skip the first 6 commas.
             unsigned comma = 0;
             while(comma < 6){
-                c = fgetc(wahoo_file);
-                if(c == ',')
+                if(fgetc(wahoo_file) == ',')
                     comma++;
             }
             mps[j] = 0.0;
@@ -200,7 +198,8 @@ int main(int argc, char **argv){
             np[i] += ra[j] / duration[i];
         }
         // Find 4th root of this number. This is NP.
-        np[i] = sqrt(sqrt(np[i]));
+//        np[i] = sqrt(sqrt(np[i]));
+        np[i] = pow(np[i], 0.25);
 
         // Calculate file_FTP: maximum value from 20-min rolling average.
         rolling_average(mps, ra, duration[i], 1200);
@@ -247,20 +246,33 @@ int main(int argc, char **argv){
     }
 
     // calculate how many interpolations I need.
-    unsigned interpolation_count = 0;
+    unsigned interpolations = 0;
     for(i = 1; i < array_size; i++){
         unsigned day_diff = (ts[i] / 86400) - (ts[i - 1] / 86400);
         if(day_diff > 1){
-            interpolation_count += day_diff - 1;
+            interpolations += day_diff - 1;
         }
     }
+    printf("adding %u interpolations.\n", interpolations);
+
+    // calculate how many appendage entries I need.
+    long long unsigned current_time = time(NULL) / 86400;
+    long long unsigned last_time = ts[array_size - 1] / 86400;
+    unsigned appendage = current_time - last_time;
+
+    // Don't add a blank entry for today since I could still work out.
+    if(appendage)
+        appendage--;
+
+    printf("adding %u appendages.\n", appendage);
 
     // create an interpolated array.
-    if(interpolation_count > 0){
-        if((new_ts = malloc((array_size + interpolation_count) * sizeof(long long unsigned))) == NULL){ puts("malloc failed."); exit(1); }
-        if((new_np = malloc((array_size + interpolation_count) * sizeof(double))) == NULL){ puts("malloc failed."); exit(1); }
-        if((new_duration = malloc((array_size + interpolation_count) * sizeof(unsigned))) == NULL){ puts("malloc failed."); exit(1); }
-        if((new_file_ftp = malloc((array_size + interpolation_count) * sizeof(double))) == NULL){ puts("malloc failed.n"); exit(1); }
+    unsigned new_size = array_size + interpolations + appendage;
+    if(new_size > array_size){
+        if((new_ts = malloc(new_size * sizeof(long long unsigned))) == NULL){ puts("malloc failed."); exit(1); }
+        if((new_np = malloc(new_size * sizeof(double))) == NULL){ puts("malloc failed."); exit(1); }
+        if((new_duration = malloc(new_size * sizeof(unsigned))) == NULL){ puts("malloc failed."); exit(1); }
+        if((new_file_ftp = malloc(new_size * sizeof(double))) == NULL){ puts("malloc failed.n"); exit(1); }
 
         // Copy first value over because that one is fine.
         new_ts[0]       = ts[0];
@@ -285,6 +297,13 @@ int main(int argc, char **argv){
             new_duration[j] = duration[i];
         }
 
+        // write appendages.
+        for(i = array_size + interpolations; i < new_size; i++){
+            new_ts[i] = new_ts[i - 1] / 86400 * 86400 + 86400;
+            new_np[i] = 0.0;
+            new_duration[i] = 0;
+            new_file_ftp[i] = 0.0;
+        }
 
         // interpolated array is complete. swap pointers for new and old arrays, and free the old ones.
         long long unsigned *llu_temp = ts;
@@ -305,66 +324,7 @@ int main(int argc, char **argv){
         file_ftp = new_file_ftp;
         free(d_temp);
 
-        array_size += interpolation_count;
-    }
-
-    // calculate how many appendage entries I need.
-    long long unsigned current_time = time(NULL) / 86400;
-    long long unsigned last_time = ts[array_size - 1] / 86400;
-    unsigned appendage = current_time - last_time;
-
-    // Don't add a blank entry for today since I could still work out.
-    if(appendage == 1)
-        appendage = 0;
-    else if (appendage > 0)
-        appendage--;
-
-    printf("adding %u appendages!\n", appendage);
-
-    // Create yet another array to hold the appendage entries.
-    if(appendage > 0){
-        if((new_ts = malloc((array_size + appendage) * sizeof(long long unsigned))) == NULL){ puts("malloc failed."); exit(1); }
-        if((new_np       = malloc((array_size + appendage) * sizeof(double))) == NULL){ puts("malloc failed.n"); exit(1); }
-        if((new_duration = malloc((array_size + appendage) * sizeof(unsigned))) == NULL){ puts("malloc failed.n"); exit(1); }
-        if((new_file_ftp = malloc((array_size + appendage) * sizeof(double))) == NULL){ puts("malloc failed.n"); exit(1); }
-
-        // copy array over.
-        for(i = 0; i < array_size; i++){
-            new_ts[i]       = ts[i];
-            new_np[i]       = np[i];
-            new_duration[i] = duration[i];
-            new_file_ftp[i] = file_ftp[i];
-        }
-
-        // write appendages.
-        for(i = array_size; i < array_size + appendage; i++){
-            new_ts[i] = new_ts[i - 1] / 86400 * 86400 + 86400;
-            new_np[i] = 0.0;
-            new_duration[i] = 0;
-            new_file_ftp[i] = 0.0;
-        }
-
-        // again, switch array pointers and free mem.
-        long long unsigned *llu_temp;
-        llu_temp = ts;
-        ts = new_ts;
-        free(llu_temp);
-
-        unsigned *u_temp;
-        u_temp = duration;
-        duration = new_duration;
-        free(u_temp);
-
-        double *d_temp;
-        d_temp = np;
-        np = new_np;
-        free(d_temp);
-
-        d_temp = file_ftp;
-        file_ftp = new_file_ftp;
-        free(d_temp);
-
-        array_size += appendage;
+        array_size = new_size;
     }
 
     // malloc space for next set of calculations.
