@@ -1,3 +1,4 @@
+
 /* Thu Feb 21 15:39:49 CST 2019 Wahoo .csv file processing code.  For more
  * details, read README.md.  either use make, or compile with: gcc
  * silvercheetah.c -o silvercheetah -lm
@@ -33,7 +34,13 @@
 #define TSS_LOG_PATH "/home/korgan/code/silvercheetah/tss.log"
 #define CONFIG_PATH "/home/korgan/code/silvercheetah/config"
 
-int rolling_average(double* array, double* target, unsigned n, unsigned interval){
+void rolling_average(double* array, double* target, unsigned n, unsigned interval){
+
+    if(array == NULL || target == NULL){
+        puts("rolling_average(): null pointers. Why?");
+        exit(1);
+    }
+
     for(unsigned i = 0; i < n; i++){
         if(i < interval){
             if(i == 0)
@@ -42,11 +49,24 @@ int rolling_average(double* array, double* target, unsigned n, unsigned interval
                 target[i] = (target[i - 1] * i + array[i]) / (i + 1);
         }
         else
-            //target[i] = (target[i - 1] * interval + array[i] - array[i - interval]) / interval;
             target[i] = target[i - 1] + (array[i] - array[i - interval]) / interval;
-
     }
-    return 1;
+}
+
+unsigned line_count(FILE *fp){
+    if(fp == NULL){
+        puts("line_count(): fp is NULL. Why?");
+        exit(1);
+    }
+
+    // Count lines in file.
+    unsigned count = 0;
+    while(!feof(fp)){
+        if(fgetc(fp) == '\n')
+            count++;
+    }
+    rewind(fp);
+    return count;
 }
 
 int main(int argc, char **argv){
@@ -98,12 +118,7 @@ int main(int argc, char **argv){
         puts("can't open filelist");
         exit(1);
     }
-    filecount = 0;
-    while(!feof(fp)){
-        if(fgetc(fp) == '\n')
-            filecount++;
-    }
-    rewind(fp);
+    filecount = line_count(fp);
 
     // if no files found, clean up and exit.
     if(filecount == 0){
@@ -139,13 +154,7 @@ int main(int argc, char **argv){
         printf("opening %s\n", filename);
 
         // Count lines in the file.
-        duration[i] = 0;
-        while(!feof(wahoo_file)){
-            if(fgetc(wahoo_file) == '\n')
-                duration[i]++;
-        }
-        duration[i]--;
-        rewind(wahoo_file);
+        duration[i] = line_count(wahoo_file) - 1;
 
         // Skip header line.
         while((c = fgetc(wahoo_file)) != '\n' && c != EOF);
