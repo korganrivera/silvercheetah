@@ -53,6 +53,28 @@ void rolling_average(double* array, double* target, unsigned n, unsigned interva
     }
 }
 
+void rolling_max(double* array, double* target, unsigned n, unsigned interval){
+
+    if(array == NULL || target == NULL){
+        puts("rolling_max(): null pointers. Why?");
+        exit(1);
+    }
+
+    unsigned low;
+
+    for(unsigned i = 0; i < n; i++){
+        if(i < interval)
+            low = 0;
+        else
+            low = i + 1 - interval;
+        target[i] = array[low];
+        for(unsigned j = low + 1; j <= i; j++){
+            if(array[j] > target[i])
+                target[i] = array[j];
+        }
+    }
+}
+
 unsigned line_count(FILE *fp){
     if(fp == NULL){
         puts("line_count(): fp is NULL. Why?");
@@ -344,27 +366,41 @@ int main(int argc, char **argv){
     if((atl      = malloc(array_size * sizeof(double))) == NULL){ puts("malloc failed."); exit(1); }
     if((tsb      = malloc(array_size * sizeof(double))) == NULL){ puts("malloc failed."); exit(1); }
 
-    // calculate table_ftp: current ftp will be highest ftp before current.
-    ftp[0] = file_ftp[0];
-    for(i = 1; i < array_size; i++){
-        if(file_ftp[i] > ftp[i - 1])
-            ftp[i] = file_ftp[i];
-        else
-            ftp[i] = ftp[i - 1];
-    }
 
-    // improve FTP estimate by linear-interpolating the high values.
-    unsigned left = 0;
+    // ftp will be 28-day rolling max of file_ftp values. That way, FTP can drop if you slack too long.
+    rolling_max(file_ftp, ftp, array_size, 28);
+
+    // replace zero ftp values with last-known ftp value; if you don't work out for 28 days, it'll say your FTP is zero.
+    // This will screw up all calculations after this day. This prevents it.
+    // None of this is ideal. Ideally, I could model FTP decay but this is a decent hack for now.
+    double last_known = ftp[0];
     for(i = 1; i < array_size; i++){
-        if(ftp[i] > ftp[left]){
-            // interpolate between ftp[left] and ftp[i].
-            unsigned gap = i - left;
-            double change = (ftp[i] - ftp[left]) / gap;
-            for(left = left + 1; left < i; left++){
-                ftp[left] = ftp[left - 1] + change;
-            }
-        }
+        if(ftp[i] < 1.0)
+            ftp[i] = last_known;
+        else
+            last_known = ftp[i];
     }
+ // calculate table_ftp: current ftp will be highest ftp before current.
+//    ftp[0] = file_ftp[0];
+ //   for(i = 1; i < array_size; i++){
+ //       if(file_ftp[i] > ftp[i - 1])
+ //           ftp[i] = file_ftp[i];
+ //       else
+ //           ftp[i] = ftp[i - 1];
+ //   }
+
+ //   // improve FTP estimate by linear-interpolating the high values.
+ //   unsigned left = 0;
+ //   for(i = 1; i < array_size; i++){
+ //       if(ftp[i] > ftp[left]){
+ //           // interpolate between ftp[left] and ftp[i].
+ //           unsigned gap = i - left;
+ //           double change = (ftp[i] - ftp[left]) / gap;
+ //           for(left = left + 1; left < i; left++){
+ //               ftp[left] = ftp[left - 1] + change;
+ //           }
+ //       }
+ //   }
 
     // calculate IF.
     for(i = 0; i < array_size; i++){
