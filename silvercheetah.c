@@ -366,9 +366,10 @@ int main(int argc, char **argv){
     if((atl      = malloc(array_size * sizeof(double))) == NULL){ puts("malloc failed."); exit(1); }
     if((tsb      = malloc(array_size * sizeof(double))) == NULL){ puts("malloc failed."); exit(1); }
 
+    // CALCULATE FTP VALUES.
     // convert fileftp values to actual FTP values:
     //   1. replace zeroes with last-known fileftp value.
-    //   2. calculate rolling max with 42-day window.
+    //   2. calculate rolling max with 28-day window.
     // not a perfect solution, but a good start.
 
     // Replace zeroes with last-known fileftp value.
@@ -380,8 +381,8 @@ int main(int argc, char **argv){
             last_known = file_ftp[i];
     }
 
-    // calculate rolling max with 42-day window.
-    rolling_max(file_ftp, ftp, array_size, 42);
+    // calculate rolling max with 28-day window.
+    rolling_max(file_ftp, ftp, array_size, 28);
 
     // calculate IF.
     for(i = 0; i < array_size; i++){
