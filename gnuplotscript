@@ -1,7 +1,10 @@
 set xlabel "Time"
 set terminal wxt size 1200,600
+set grid ytics lc rgb "#bbbbbb" lw 1 lt 0
+set grid xtics lc rgb "#bbbbbb" lw 1 lt 0
+set y2tics nomirror tc lt 2
 plot 'tss.log' every ::1 using 6 with lines title 'TSS', \
-     'tss.log' every ::1 using 7 with lines title 'ATL: fatigue', \
+     'tss.log'  every ::1 using 7 with lines title 'ATL: fatigue' linecolor "red", \
      'tss.log' every ::1 using 8 with lines title 'CTL: fitness', \
      'tss.log' every ::1 using 9 with lines title 'TSB: freshness'
 pause -1
